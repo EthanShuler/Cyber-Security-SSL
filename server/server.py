@@ -14,6 +14,8 @@
 """
 
 import socket
+import hashlib
+import uuid
 
 host = "localhost"
 port = 10001
@@ -68,7 +70,8 @@ def verify_hash(user, password):
             if line[0] == user:
                 # TODO: Generate the hashed password
                 salt = line[1]
-                # hashed_password =
+                hashed_password = hashlib.sha256(
+                    (password + salt).encode('utf-8')).hexdigest()
                 return hashed_password == line[2]
         reader.close()
     except FileNotFoundError:
