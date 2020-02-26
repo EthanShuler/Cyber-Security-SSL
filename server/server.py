@@ -8,9 +8,9 @@
         is provided as a sanity check)
 
     Put your team members' names:
-
-
-
+    Ethan Shuler
+    John Henry Fitzgerald
+    Israel Miles
 """
 
 import socket

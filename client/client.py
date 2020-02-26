@@ -8,14 +8,16 @@
         is provided as a sanity check)
 
     Put your team members' names:
-
-
-
+    Ethan Shuler
+    John Henry Fitzgerald
+    Israel Miles
 """
 
 import socket
 import os
 from Crypto.Cipher import AES
+from Crypto.Cipher import Random
+from Crypto.PublicKey import RSA
 
 
 host = "localhost"
@@ -37,8 +39,12 @@ def generate_key():
 # Takes an AES session key and encrypts it using the appropriate
 # key and return the value
 def encrypt_handshake(session_key):
-    # TODO: Implement this function
-    pass
+    # TODO: Implement this function - use public key
+    f = open('rsa.pub', 'r')
+    pub_key = RSA.importKey(f.read())
+    iv = Random.new().read(AES.block_size)
+    cipher = AES.new(pub_key, AES.MODE_CFB, iv)
+    return iv + cipher.encrypt(session_key)
 
 
 # Encrypts the message using AES. Same as server function
