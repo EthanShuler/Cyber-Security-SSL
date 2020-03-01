@@ -41,19 +41,22 @@ def decrypt_message(client_message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
     #Can replace nonce with an initialization vector if needed
-    #iv = Random.new().read(AES.block_size)
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-    return cipher_aes.decrypt(client_message)
+    client_message = base64.b64decode(client_message)
+    iv = client_message[:16]
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, iv)
+    #NEED TO DEPAD THIS SOMEHOW!!
+    return cipher_aes.decrypt(client_message[16:])
 
 
 # Encrypt a message using the session key
 def encrypt_message(message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
-    #Can replace nonce with an initialization vector if needed
-    #iv = Random.new().read(AES.block_size)
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-    return cipher_aes.encrypt(message)
+
+    message = pad_message(message)
+    iv = Random.new().read(AES.block_size) #init vector
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, iv)
+    return base64.b64encode(iv + cipher_aes.encrypt(message))
 
 
 # Receive 1024 bytes from the client
