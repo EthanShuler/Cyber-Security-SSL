@@ -71,6 +71,7 @@ def verify_hash(user, password):
             line = line.split("\t")
             if line[0] == user:
                 # TODO: Generate the hashed password
+                #IS THIS STILL DO DO?? SEEMS DONE?
                 salt = line[1]
                 hashed_password = hashlib.sha256(
                     (password + salt).encode('utf-8')).hexdigest()
@@ -114,7 +115,7 @@ def main():
                 ciphertext_message = decrypt_message(ciphertext_message)
 
                 # TODO: Split response from user into the username and password
-                ciphertext_message = 
+                ciphertext_message =
 
                 # DONE: Encrypt response to client
                 cipertext_response = encrypt_message(ciphertext_message)
