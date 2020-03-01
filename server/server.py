@@ -21,6 +21,7 @@ import os
 from Crypto.Cipher import AES
 from Crypto import Random
 from Crypto.PublicKey import RSA
+ from Crypto.Cipher import PKCS1_OAEP
 
 host = "localhost"
 port = 10001
@@ -35,9 +36,9 @@ def pad_message(message):
 def decrypt_key(session_key):
     # UNTESTED: Implement this function
     f = open('rsa', 'r')
-    cipher_rsa = RSA.importKey(f.read())
-    session_key = cipher_rsa.decrypt(session_key)
-    return session_key
+    key = RSA.importKey(f.read())
+    cipher = PKCS1_OAEP.new(key)
+    return cipher.decrypt(session_key)
 
 
 
@@ -57,7 +58,6 @@ def decrypt_message(client_message, session_key):
 def encrypt_message(message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
-
     message = pad_message(message)
     iv = Random.new().read(AES.block_size) #init vector
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
