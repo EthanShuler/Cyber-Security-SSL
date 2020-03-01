@@ -28,16 +28,19 @@ def pad_message(message):
 
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
-    # TODO: Implement this function
-
-    pass
+    # UNTESTED: Implement this function
+    cipher_rsa = PKCS1_OAEP.new(private_key)
+    session_key = cipher_rsa.decrypt(session_key)
+    return session_key
+    
 
 
 # Write a function that decrypts a message using the session key
 def decrypt_message(client_message, session_key):
-    # TODO: Implement this function
-
-    pass
+    # UNTESTED: Implement this function
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+    data = cipher_aes.decrypt_and_verify(ciphertext, tag)
+    return data.decode("utf-8")
 
 
 # Encrypt a message using the session key
