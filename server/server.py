@@ -22,9 +22,10 @@ from Crypto.Cipher import AES
 from Crypto import Random
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+import base64
 
 host = "localhost"
-port = 10001
+port = 10002
 
 
 # A helper function. It may come in handy when performing symmetric encryption
@@ -35,10 +36,11 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # UNTESTED: Implement this function
-    f = open('rsa.pem', 'r')
+    f = open('private.pem', 'r')
     key = RSA.importKey(f.read())
-    cipher = PKCS1_OAEP.new(key)
-    return cipher.decrypt(session_key)
+    decrypted = key.decrypt(session_key)
+    #cipher = PKCS1_OAEP.new(key)
+    return decrypted #cipher.decrypt(session_key)
 
 
 
@@ -48,10 +50,11 @@ def decrypt_message(client_message, session_key):
     #Can change MODE_EAX to MODE_CBC or something else
     #Can replace nonce with an initialization vector if needed
     client_message = base64.b64decode(client_message)
-    iv = client_message[:16]
+    iv = client_message.read(16)
+    print('dec iv', iv)
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     #NEED TO DEPAD THIS SOMEHOW!!
-    return cipher_aes.decrypt(f[16:])
+    return cipher_aes.decrypt(client_message)
 
 
 # Encrypt a message using the session key
@@ -59,9 +62,11 @@ def encrypt_message(message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
     message = pad_message(message)
-    iv = Random.new().read(AES.block_size) #init vector
+    iv = Random.new().read(16) #init vector
+    print('enc iv', iv)
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     return base64.b64encode(iv + cipher_aes.encrypt(message))
+    # return base64.b64encode(cipher_aes.encrypt(message))
 
 
 # Receive 1024 bytes from the client
@@ -101,6 +106,17 @@ def verify_hash(user, password):
 
 
 def main():
+    private_key = RSA.generate(2048)
+    public_key = private_key.publickey()
+
+    private_file = open('private.pem', 'wb')
+    private_file.write(private_key.exportKey('PEM'))
+    private_file.close()
+
+    private_file = open('../client/public.pem', 'wb')
+    private_file.write(public_key.exportKey('PEM'))
+    private_file.close()
+
     # Set up network connection listener
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = (host, port)
@@ -133,8 +149,9 @@ def main():
                 ciphertext_message = decrypt_message(ciphertext_message, plaintext_key)
 
                 # DONE: Split response from user into the username and password
-                username = ciphertext_message.split()[1]
-                password = ciphertext_message.split()[2]
+                ciphertext_message = ciphertext_message.split()
+                username = ciphertext_message[0]
+                password = ciphertext_message[1]
 
                 # DONE: Encrypt response to client
                 if verify_hash(username,password):
@@ -144,7 +161,7 @@ def main():
                 cipertext_response = encrypt_message(response_to_client, plaintext_key)
 
                 # Send encrypted response
-                send_message(connection, ciphertext_response)
+                send_message(connection, cipertext_response)
             finally:
                 # Clean up the connection
                 connection.close()

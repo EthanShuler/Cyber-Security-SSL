@@ -18,10 +18,12 @@ import os
 from Crypto.Cipher import AES
 from Crypto import Random
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+import base64
 
 
 host = "localhost"
-port = 10001
+port = 10002
 
 
 # A helper function that you may find useful for AES encryption
@@ -40,11 +42,11 @@ def generate_key():
 # key and return the value
 def encrypt_handshake(session_key):
     # TODO: Implement this function - use public key
-    f = open('rsa.pub', 'r')
+    f = open('public.pem', 'r')
     pub_key = RSA.importKey(f.read())
-    iv = Random.new().read(AES.block_size)
-    cipher = AES.new(pub_key, AES.MODE_CFB, iv)
-    return iv + cipher.encrypt(session_key)
+    encrypted = pub_key.encrypt(session_key, 32)
+    #encryptor = PKCS1_OAEP.new(pub_key)
+    return encrypted[0] #encryptor.encrypt(session_key.encode())
 
 
 # Encrypts the message using AES. Same as server function
@@ -52,9 +54,12 @@ def encrypt_message(message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
     message = pad_message(message)
-    iv = Random.new().read(AES.block_size) #init vector
+    iv = Random.new().read(16) #init vector
+    print('iv', iv)
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     return base64.b64encode(iv + cipher_aes.encrypt(message))
+    # return base64.b64encode(cipher_aes.encrypt(message))
+
 
 
 # Decrypts the message using AES. Same as server function
@@ -63,10 +68,11 @@ def decrypt_message(client_message, session_key):
     #Can change MODE_EAX to MODE_CBC or something else
     #Can replace nonce with an initialization vector if needed
     client_message = base64.b64decode(client_message)
-    iv = client_message[:16]
+    iv = Random.new().read(16)
+    print('decrypt iv',iv)
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     #NEED TO DEPAD THIS SOMEHOW!!
-    return cipher_aes.decrypt(f[16:])
+    return cipher_aes.decrypt(client_message)
 
 
 # Sends a message over TCP
@@ -111,12 +117,12 @@ def main():
             exit(0)
 
         # DONE: Encrypt message and send to server
-        enc_message = encrypt_message(message, encrypted_key)
+        enc_message = encrypt_message(message, key)
         send_message(sock, enc_message)
 
         # DONE: Receive and decrypt response from server
         data = receive_message(sock)
-        decrypt_message(data, session_key)
+        print(decrypt_message(data, key))
     finally:
         print('closing socket')
         sock.close()
