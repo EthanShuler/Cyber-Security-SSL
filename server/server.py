@@ -45,7 +45,7 @@ def decrypt_message(client_message, session_key):
     iv = client_message[:16]
     cipher_aes = AES.new(session_key, AES.MODE_EAX, iv)
     #NEED TO DEPAD THIS SOMEHOW!!
-    return cipher_aes.decrypt(client_message[16:])
+    return cipher_aes.decrypt(f[16:])
 
 
 # Encrypt a message using the session key
