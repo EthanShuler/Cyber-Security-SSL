@@ -29,12 +29,14 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # TODO: Implement this function
+
     pass
 
 
 # Write a function that decrypts a message using the session key
 def decrypt_message(client_message, session_key):
     # TODO: Implement this function
+
     pass
 
 
@@ -108,11 +110,14 @@ def main():
                 # Receive encrypted message from client
                 ciphertext_message = receive_message(connection)
 
-                # TODO: Decrypt message from client
+                # DONE: Decrypt message from client
+                ciphertext_message = decrypt_message(ciphertext_message)
 
                 # TODO: Split response from user into the username and password
+                ciphertext_message = 
 
-                # TODO: Encrypt response to client
+                # DONE: Encrypt response to client
+                cipertext_response = encrypt_message(ciphertext_message)
 
                 # Send encrypted response
                 send_message(connection, ciphertext_response)
