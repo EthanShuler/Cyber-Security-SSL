@@ -29,24 +29,31 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # UNTESTED: Implement this function
-    cipher_rsa = PKCS1_OAEP.new(private_key)
+    f = open('rsa.pub', 'r')
+    cipher_rsa = RSA.importKey(f.read())
     session_key = cipher_rsa.decrypt(session_key)
     return session_key
-    
+
 
 
 # Write a function that decrypts a message using the session key
 def decrypt_message(client_message, session_key):
     # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+    #Can replace nonce with an initialization vector if needed
+    #iv = Random.new().read(AES.block_size)
     cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-    data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-    return data.decode("utf-8")
+    return cipher_aes.decrypt(client_message)
 
 
 # Encrypt a message using the session key
 def encrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+    # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+    #Can replace nonce with an initialization vector if needed
+    #iv = Random.new().read(AES.block_size)
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+    return cipher_aes.encrypt(message)
 
 
 # Receive 1024 bytes from the client
@@ -115,13 +122,13 @@ def main():
                 ciphertext_message = receive_message(connection)
 
                 # DONE: Decrypt message from client
-                ciphertext_message = decrypt_message(ciphertext_message)
+                ciphertext_message = decrypt_message(ciphertext_message, plaintext_key)
 
                 # TODO: Split response from user into the username and password
                 ciphertext_message =
 
                 # DONE: Encrypt response to client
-                cipertext_response = encrypt_message(ciphertext_message)
+                cipertext_response = encrypt_message(ciphertext_message, plaintext_key)
 
                 # Send encrypted response
                 send_message(connection, ciphertext_response)
