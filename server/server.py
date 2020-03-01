@@ -16,6 +16,11 @@
 import socket
 import hashlib
 import uuid
+import socket
+import os
+from Crypto.Cipher import AES
+from Crypto import Random
+from Crypto.PublicKey import RSA
 
 host = "localhost"
 port = 10001
@@ -43,7 +48,7 @@ def decrypt_message(client_message, session_key):
     #Can replace nonce with an initialization vector if needed
     client_message = base64.b64decode(client_message)
     iv = client_message[:16]
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, iv)
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     #NEED TO DEPAD THIS SOMEHOW!!
     return cipher_aes.decrypt(f[16:])
 
@@ -55,7 +60,7 @@ def encrypt_message(message, session_key):
 
     message = pad_message(message)
     iv = Random.new().read(AES.block_size) #init vector
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, iv)
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     return base64.b64encode(iv + cipher_aes.encrypt(message))
 
 

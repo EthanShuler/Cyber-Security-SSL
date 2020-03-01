@@ -16,7 +16,7 @@
 import socket
 import os
 from Crypto.Cipher import AES
-from Crypto.Cipher import Random
+from Crypto import Random
 from Crypto.PublicKey import RSA
 
 
@@ -48,15 +48,26 @@ def encrypt_handshake(session_key):
 
 
 # Encrypts the message using AES. Same as server function
-def encrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+def decrypt_message(client_message, session_key):
+    # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+    #Can replace nonce with an initialization vector if needed
+    client_message = base64.b64decode(client_message)
+    iv = client_message[:16]
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
+    #NEED TO DEPAD THIS SOMEHOW!!
+    return cipher_aes.decrypt(f[16:])
 
 
 # Decrypts the message using AES. Same as server function
-def decrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+def encrypt_message(message, session_key):
+    # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+
+    message = pad_message(message)
+    iv = Random.new().read(AES.block_size) #init vector
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
+    return base64.b64encode(iv + cipher_aes.encrypt(message))
 
 
 # Sends a message over TCP
