@@ -83,8 +83,8 @@ def verify_hash(user, password):
         for line in reader.read().split('\n'):
             line = line.split("\t")
             if line[0] == user:
-                # TODO: Generate the hashed password
-                #IS THIS STILL DO DO?? SEEMS DONE?
+                # DONE: Generate the hashed password
+                
                 salt = line[1]
                 hashed_password = hashlib.sha256(
                     (password + salt).encode('utf-8')).hexdigest()
