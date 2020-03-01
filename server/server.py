@@ -21,7 +21,7 @@ import os
 from Crypto.Cipher import AES
 from Crypto import Random
 from Crypto.PublicKey import RSA
- from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Cipher import PKCS1_OAEP
 
 host = "localhost"
 port = 10001
@@ -35,7 +35,7 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # UNTESTED: Implement this function
-    f = open('rsa', 'r')
+    f = open('rsa.pem', 'r')
     key = RSA.importKey(f.read())
     cipher = PKCS1_OAEP.new(key)
     return cipher.decrypt(session_key)
