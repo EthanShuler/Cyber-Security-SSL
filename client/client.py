@@ -16,7 +16,7 @@
 import socket
 import os
 from Crypto.Cipher import AES
-from Crypto.Cipher import Random
+from Crypto import Random
 from Crypto.PublicKey import RSA
 
 
