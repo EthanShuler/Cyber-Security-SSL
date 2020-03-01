@@ -18,6 +18,7 @@ import os
 from Crypto.Cipher import AES
 from Crypto.Cipher import Random
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
 
 host = "localhost"
@@ -32,7 +33,6 @@ def pad_message(message):
 
 # TODO: Generate a cryptographically random AES key
 def generate_key():
-    # TODO: Implement this function
     return os.urandom(16)
 
 
@@ -40,14 +40,16 @@ def generate_key():
 # key and return the value
 def encrypt_handshake(session_key):
     # TODO: Implement this function - use public key
-    f = open('rsa.pub', 'r')
+    f = open('rsa.pem', 'r')
     pub_key = RSA.importKey(f.read())
-    iv = Random.new().read(AES.block_size)
-    cipher = AES.new(pub_key, AES.MODE_CFB, iv)
-    return iv + cipher.encrypt(session_key)
+    encryptor = PKCS1_OAEP.new(pub_key)
+
+    return encryptor.encrypt(session_key.encode())
 
 
 # Encrypts the message using AES. Same as server function
+
+
 def encrypt_message(message, session_key):
     # TODO: Implement this function
     pass
@@ -101,8 +103,12 @@ def main():
             exit(0)
 
         # TODO: Encrypt message and send to server
+        enc_message = encrypt_message(message, encrypted_key)
+        send_message(sock, enc_message)
 
         # TODO: Receive and decrypt response from server
+        data = receive_message(sock)
+        decrypt_message(data, session_key)
     finally:
         print('closing socket')
         sock.close()
