@@ -63,7 +63,6 @@ def decrypt_message(client_message, session_key):
 def encrypt_message(message, session_key):
     # UNTESTED: Implement this function
     #Can change MODE_EAX to MODE_CBC or something else
-
     message = pad_message(message)
     iv = Random.new().read(AES.block_size) #init vector
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
