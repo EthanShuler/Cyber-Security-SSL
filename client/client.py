@@ -32,7 +32,7 @@ def pad_message(message):
 
 # TODO: Generate a cryptographically random AES key
 def generate_key():
-    # TODO: Implement this function
+    # DONE: Implement this function
     return os.urandom(16)
 
 
@@ -49,14 +49,24 @@ def encrypt_handshake(session_key):
 
 # Encrypts the message using AES. Same as server function
 def encrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+    # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+    message = pad_message(message)
+    iv = Random.new().read(AES.block_size) #init vector
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
+    return base64.b64encode(iv + cipher_aes.encrypt(message))
 
 
 # Decrypts the message using AES. Same as server function
-def decrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+def decrypt_message(client_message, session_key):
+    # UNTESTED: Implement this function
+    #Can change MODE_EAX to MODE_CBC or something else
+    #Can replace nonce with an initialization vector if needed
+    client_message = base64.b64decode(client_message)
+    iv = client_message[:16]
+    cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
+    #NEED TO DEPAD THIS SOMEHOW!!
+    return cipher_aes.decrypt(f[16:])
 
 
 # Sends a message over TCP
@@ -100,9 +110,13 @@ def main():
             print("Couldn't connect to server")
             exit(0)
 
-        # TODO: Encrypt message and send to server
+        # DONE: Encrypt message and send to server
+        enc_message = encrypt_message(message, encrypted_key)
+        send_message(sock, enc_message)
 
-        # TODO: Receive and decrypt response from server
+        # DONE: Receive and decrypt response from server
+        data = receive_message(sock)
+        decrypt_message(data, session_key)
     finally:
         print('closing socket')
         sock.close()
