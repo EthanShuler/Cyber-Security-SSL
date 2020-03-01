@@ -29,7 +29,7 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # UNTESTED: Implement this function
-    f = open('rsa.pub', 'r')
+    f = open('rsa', 'r')
     cipher_rsa = RSA.importKey(f.read())
     session_key = cipher_rsa.decrypt(session_key)
     return session_key
@@ -84,7 +84,7 @@ def verify_hash(user, password):
             line = line.split("\t")
             if line[0] == user:
                 # DONE: Generate the hashed password
-                
+
                 salt = line[1]
                 hashed_password = hashlib.sha256(
                     (password + salt).encode('utf-8')).hexdigest()
@@ -127,11 +127,16 @@ def main():
                 # DONE: Decrypt message from client
                 ciphertext_message = decrypt_message(ciphertext_message, plaintext_key)
 
-                # TODO: Split response from user into the username and password
-                ciphertext_message =
+                # DONE: Split response from user into the username and password
+                username = ciphertext_message.split()[1]
+                password = ciphertext_message.split()[2]
 
                 # DONE: Encrypt response to client
-                cipertext_response = encrypt_message(ciphertext_message, plaintext_key)
+                if verify_hash(username,password):
+                    response_to_client = "Password accepted. Welcome!"
+                else:
+                    response_to_client = "Username/Password combination does not exist"
+                cipertext_response = encrypt_message(response_to_client, plaintext_key)
 
                 # Send encrypted response
                 send_message(connection, ciphertext_response)
