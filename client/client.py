@@ -23,7 +23,7 @@ import base64
 
 
 host = "localhost"
-port = 10002
+port = 10001
 
 
 # A helper function that you may find useful for AES encryption
@@ -41,38 +41,27 @@ def generate_key():
 # Takes an AES session key and encrypts it using the appropriate
 # key and return the value
 def encrypt_handshake(session_key):
-    # TODO: Implement this function - use public key
+    # DONE: Implement this function - use public key
     f = open('public.pem', 'r')
     pub_key = RSA.importKey(f.read())
     encrypted = pub_key.encrypt(session_key, 32)
-    #encryptor = PKCS1_OAEP.new(pub_key)
-    return encrypted[0] #encryptor.encrypt(session_key.encode())
+    return encrypted[0]
 
 
 # Encrypts the message using AES. Same as server function
 def encrypt_message(message, session_key):
-    # UNTESTED: Implement this function
-    #Can change MODE_EAX to MODE_CBC or something else
     message = pad_message(message)
     iv = Random.new().read(16) #init vector
-    print('iv', iv)
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
     return base64.b64encode(iv + cipher_aes.encrypt(message))
-    # return base64.b64encode(cipher_aes.encrypt(message))
-
 
 
 # Decrypts the message using AES. Same as server function
 def decrypt_message(client_message, session_key):
-    # UNTESTED: Implement this function
-    #Can change MODE_EAX to MODE_CBC or something else
-    #Can replace nonce with an initialization vector if needed
     client_message = base64.b64decode(client_message)
-    iv = Random.new().read(16)
-    print('decrypt iv',iv)
+    iv = client_message[:16]
     cipher_aes = AES.new(session_key, AES.MODE_CFB, iv)
-    #NEED TO DEPAD THIS SOMEHOW!!
-    return cipher_aes.decrypt(client_message)
+    return cipher_aes.decrypt(client_message[16:]).decode('utf-8')
 
 
 # Sends a message over TCP
