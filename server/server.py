@@ -91,7 +91,94 @@ def verify_hash(user, password):
     except FileNotFoundError:
         return False
     return False
+                
+    
+def verify_mac(user, user_doc, user_mac):
+    try:
+        reader = open("passfile.txt", 'r')
+        for line in reader.read().split('\n'):
+            line = line.split("\t")
+            if line[0] == user:
+                hashed_mac = hashlib.sha256(
+                    (user_mac + line[1]).encode('utf-8')).hexdigest()
+                return hashed_mac == line[3]
+        reader.close()
+    except FileNotFoundError:
+        return "File error"
+    return "File error"
 
+
+def authenticate_mac(user_mac, user_doc):
+    user_clearance = user_mac.split(",")[0]
+    user_categories = user_mac.split("{")[1][:-1].split(",")
+    
+    if user_clearance == "U":
+        user_clearance = 0
+    elif user_clearance == "C":
+        user_clearance = 1
+    elif user_clearance == "S":
+        user_clearance = 2
+    elif user_clearance == "TS":
+        user_clearance = 3
+        
+    try:
+        reader = open("document_permissions.txt", 'r')
+        for line in reader.read().split('\n'):
+            line = line.split(":")
+            if len(line) > 1:
+                doc_name = line[0]
+                doc_clearance = line[1].split(",")[0].replace(" ","")
+                doc_categories = line[1].split("{")[1][:-1].replace(" ","").split(",")
+                while("" in doc_categories) : 
+                    doc_categories.remove("") 
+                
+                match = False
+                read = False
+                write = False
+                
+                print(doc_name)
+                if doc_name == user_doc:
+                    if doc_clearance == "U":
+                        doc_clearance = 0
+                    elif doc_clearance == "C":
+                        doc_clearance = 1
+                    elif doc_clearance == "S":
+                        doc_clearance = 2
+                    elif doc_clearance == "TS":
+                        doc_clearance = 3
+
+                    if user_clearance > doc_clearance:
+                        if not doc_categories:
+                            read = True
+                        if all(elem in user_categories for elem in doc_categories):
+                            read = True
+                    elif user_clearance == doc_clearance:
+                        if not doc_categories:
+                            read = True
+                            write = True
+                        if all(elem in user_categories for elem in doc_categories):
+                            read = True
+                            write = True
+                    elif user_clearance < doc_clearance:
+                        write = True
+                    match = True
+                        
+                if match:
+                    if read and write:
+                        return "You have the following privileges for the file: rw"
+                    elif read:
+                        return "You have the following privileges for the file: r"
+                    elif write:
+                        return "You have the following privileges for the file: w"
+                    else:
+                        return "You have the following privileges for the file: "
+                    
+        reader.close()
+    except FileNotFoundError:
+        return "File error"
+    return "File error"
+        
+    
 
 def main():
     # Set up network connection listener
@@ -129,13 +216,23 @@ def main():
                 message_in = message_in.split()
                 username = message_in[0]
                 password = message_in[1]
-                print(username, password)
+                user_doc = message_in[2]
+                user_mac = message_in[3]
+                #print(username, password, user_doc, user_mac)
 
                 # DONE: Encrypt response to client
                 if verify_hash(username,password):
-                    response_to_client = "Password accepted. Welcome!"
+                    response_to_client = "Password accepted. Welcome!\n"
+                    #TODO MAC Authorization
                 else:
-                    response_to_client = "Username/Password combination does not exist"
+                    response_to_client = "Username/Password combination does not exist."
+                    
+                if verify_mac(username, user_doc, user_mac):
+                    response_to_client = response_to_client + "Valid MAC credentials. Authenticating Mac..."
+                    response_to_client = response_to_client + authenticate_mac(user_mac, user_doc)
+                else:
+                    response_to_client = response_to_client + "User MAC credentials do not exist. Permission denied."
+                    
                 cipertext_response = encrypt_message(response_to_client, plaintext_key)
 
                 # Send encrypted response

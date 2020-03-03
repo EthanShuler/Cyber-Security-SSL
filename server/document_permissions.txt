@@ -1,0 +1,5 @@
+user_info:TS, {}
+intelligence_briefing:C, {B}
+battle_plans:TS, {A,B,C}
+defence_budget:C, {}
+ranking_chart:U, {A,C}

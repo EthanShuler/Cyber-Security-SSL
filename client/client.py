@@ -78,6 +78,7 @@ def receive_message(sock):
 def main():
     user = input("What's your username? ")
     password = input("What's your password? ")
+    user_mac = input("What are your MAC credentials?\n")
 
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -88,8 +89,11 @@ def main():
     sock.connect(server_address)
 
     try:
+        print("Document list:")
+        print("  user_info\n  intelligence_briefing\n  battle_plans\n  defence_budget\n  ranking_chart")  
+        user_doc = input("Enter the name of the document you want to access:\n")
         # Message that we need to send
-        message = user + ' ' + password
+        message = user + ' ' + password + ' ' + user_doc + ' ' + user_mac
 
         # Generate random AES key
         key = generate_key()
